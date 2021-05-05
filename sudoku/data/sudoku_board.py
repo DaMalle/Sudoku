@@ -1,48 +1,65 @@
 #! /usr/bin/env python
 
-# buit-in imports
-import copy as cp
-import random
-
-#import numpy as np
-
 class SudokuBoard:
-    def __init__(self):
-        self.BASELINE = 3
-        self.grid_len = self.BASELINE**2
-        self.grid = self.grid_len**2
-        self.UNFILED_CELLS = 20
+    def __init__(self, solution, remaining_cells, random_lib, copy_lib):
+        self._solution = solution
+        self._remaining_numbers = remaining_cells
 
-        self._board = self.create_board()
-        self.solution = cp.deepcopy(self._board)
-        self.player_board = cp.deepcopy(self.create_player_board())
-
-    def create_board(self):
-        """creates valid sudoku board"""
-
-        self.shuffled_baseline = self.shuffle([i for i in range(self.BASELINE)])
-
-        # generates and shuffles row- & column-numbers in groups, based on the length of the tile. example: [|3, 1, 2,| 6, 5, 4,|7, 9, 8|]
-        self.rows = [ group * self.BASELINE + row for group in self.shuffled_baseline for row in self.shuffled_baseline ]
-        self.columns = [ group * self.BASELINE + column for group in self.shuffled_baseline for column in self.shuffled_baseline ]
-
-        self.shuffled_numbers = self.shuffle([i for i in range(1, self.grid_len + 1)])
-
-        # returns a valid grid, based on the pattern-algorithm
-        return [ [ self.shuffled_numbers[self.apply_pattern(row, column)] for column in self.columns ] for row in self.rows ]
-
-    def create_player_board(self):
-        self.unfill_cells(self._board)
-        return self._board
-
-    # support functions
-    def unfill_cells(self, board):
-        for i in random.sample(range(self.grid), self.UNFILED_CELLS):
-            board[i // self.grid_len][i % self.grid_len] = 0
+        # Libaries
+        self.random_lib = random_lib
+        self.copy_lib = copy_lib
     
-    def shuffle(self, data):
-        return random.sample(data, len(data))
+    def create(self):
+        self._board = [list(i) for i in self._solution]
+        self.copy_lib.deepcopy(self._board)
+
+        self._unfill_cells(self._board)
+
+        self._empty_cells = [ (x, y) for y in range(9) for x in range(9) if self._board[y][x] == 0 ]
+
+        if self._is_solution(self._board, self._empty_cells):
+            return self._board
+
+    # Support/internal functions
+    def _unfill_cells(self, board):
+        for i in self.random_lib.sample(range(81), self._remaining_numbers):
+            board[i // 9][i % 9] = 0
     
-    def apply_pattern(self, row, column):
-        """creates a default board by rotating cells in the tile by 3 and then by 1 more for each new tile"""
-        return (self.BASELINE * (row % self.BASELINE) + row // self.BASELINE + column) % self.grid_len
+    def _solve(self, board, empty_cells):
+        for i in range(len(empty_cells)):
+            y = empty_cells[i][1]
+            x = empty_cells[i][0]
+            test_list = [ i for i in range(1, 10) if i != self._solution[y][x] ]
+            test_list.append(self._solution[y][x])
+            for n in test_list:
+                if self._is_possible(y,x,n):
+                    board[y][x] = n
+                    del empty_cells[0]
+                    self._solve(board, empty_cells)
+                    if empty_cells != []:
+                        board[y][x] = 0
+                        empty_cells.insert(0, (x, y))
+            break
+        return [tuple(i) for i in board]
+
+    def _is_possible(self, board, y,x,n):
+        for i in range(9): # Checks horizontal
+            if board[y][i] == n:
+                return False
+
+        for i in range(9): # Checks vertical
+            if board[i][x] == n:
+                return False
+
+        x0 = (x // 3) * 3
+        y0 = (y // 3) * 3
+        for i in range(3): # Checks tile
+            for j in range(3):
+                if board[y0+i][x0+j] == n:
+                    return False
+        return True
+
+    def _is_solution(self, board, empty_cells):
+        """Returns true if solve() is same as solution.
+        Else it returns false."""
+        return not any(filter(lambda x: x not in self._solution, self._solve(board, empty_cells)))

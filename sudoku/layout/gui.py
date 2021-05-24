@@ -9,22 +9,38 @@ import random
 from sudoku.layout.sudoku_board import SudokuBoard      # presentation
 from sudoku.layout.sudoku_numpad import SudokuNumPad    # presentation
 from sudoku.logic.game_logic import GameMode            # logic
+from sudoku.logic.game_logic import GamePlay            # logic
 from sudoku.data.sudoku_board import BoardData          # data
 from sudoku.data.sudoku_solution import SudokuSolution  # data
 
 
-class GamePage(tk.Frame):
-    def __init__(self, main, board):
+class WinPage(tk.Frame):
+    def __init__(self, main):
         super().__init__(main)
         self.main = main
-        self.board = board
+        self['bg'] = 'white'
+
+        self.draw_widget()
+        
+    def draw_widget(self):
+        tk.Button(self, text='Tillykke', height=20, width=20, font=('Arial', 32), command=self.main.destroy).pack()
+
+
+class GamePage(tk.Frame):
+    def __init__(self, main, game_data):
+        super().__init__(main)
+        self.main = main
+        self.game_data = game_data
         self['bg'] = 'white'
 
         self.draw_widget()
 
     def draw_widget(self):
-        SudokuBoard(self, self.board).pack()
-        SudokuNumPad(self).pack()
+        self.win = WinPage(self).grid(row=0, column=0, sticky='news')
+        self.game_frame = tk.Frame(self, bg='white')
+        self.game_frame.grid(row=0, column=0, sticky='news')
+        self.board = SudokuBoard(self.game_frame, self.game_data).pack()
+        self.numpad = SudokuNumPad(self.game_frame).pack()
 
 
 class SettingsPage(tk.Frame):
@@ -50,7 +66,7 @@ class ModeButton(tk.Button):
     def start_game(self):
         self.solution = [ tuple(i) for i in SudokuSolution(random).create() ]
         self.player_board = GameMode(self.mode, self.solution, BoardData, random).get_player_board()
-        GamePage(self.main.main, self.player_board).grid(row=0, column=0, sticky='news')
+        GamePage(self.main.main, GamePlay(self.solution, self.player_board)).grid(row=0, column=0, sticky='news')
 
     def configure_widget(self):
         self['width'] = 16
@@ -77,6 +93,7 @@ class MainApp(tk.Frame):
 
 def main():
     root = tk.Tk()
+    root.title('Sudoku')
     MainApp(root).pack()
     root.mainloop()
 

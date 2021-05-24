@@ -6,12 +6,12 @@ import tkinter as tk
 import random
 
 # Local imports
-from sudoku.layout.sudoku_board import SudokuBoard      # presentation
-from sudoku.layout.sudoku_numpad import SudokuNumPad    # presentation
-from sudoku.logic.game_logic import GameMode            # logic
-from sudoku.logic.game_logic import GamePlay            # logic
-from sudoku.data.sudoku_board import BoardData          # data
-from sudoku.data.sudoku_solution import SudokuSolution  # data
+from sudoku.layout.sudoku_board import SudokuBoard           # presentation
+from sudoku.layout.sudoku_numpad import SudokuNumPad         # presentation
+from sudoku.logic.game_logic import GameMode                 # logic
+from sudoku.logic.game_logic import GamePlay                 # logic
+from sudoku.data.sudoku_board_data import PlayerBoard        # data
+from sudoku.data.sudoku_solution_data import SudokuSolution  # data
 
 
 class WinPage(tk.Frame):
@@ -23,7 +23,7 @@ class WinPage(tk.Frame):
         self.draw_widget()
         
     def draw_widget(self):
-        tk.Button(self, text='Tillykke', height=20, width=20, font=('Arial', 32), command=self.main.destroy).pack()
+        tk.Button(self, text='You Won!', height=20, width=20, font=('Arial', 32), command=self.main.destroy).pack()
 
 
 class GamePage(tk.Frame):
@@ -65,7 +65,7 @@ class ModeButton(tk.Button):
     
     def start_game(self):
         self.solution = [ tuple(i) for i in SudokuSolution(random).create() ]
-        self.player_board = GameMode(self.mode, self.solution, BoardData, random).get_player_board()
+        self.player_board = GameMode(self.mode, self.solution, PlayerBoard, random).get_player_board()
         GamePage(self.main.main, GamePlay(self.solution, self.player_board)).grid(row=0, column=0, sticky='news')
 
     def configure_widget(self):

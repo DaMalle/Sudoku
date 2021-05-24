@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 
-class BoardData:
+class PlayerBoard:
     def __init__(self, solution, emptied_cells, random_lib):
         self.solution = solution
         self.emptied_cells = emptied_cells
@@ -9,7 +9,7 @@ class BoardData:
         # Libaries
         self.random_lib = random_lib
     
-    def create(self): # fix
+    def create(self):
         player_board_found = False
         while player_board_found != True:
             self.board = [ list(i) for i in self.solution ]
@@ -67,4 +67,3 @@ class BoardData:
     def is_one_solution(self, board, empty_cells):
         """Returns true if solve() is same as solution."""
         return self.solution == self.solve(board, empty_cells)
-

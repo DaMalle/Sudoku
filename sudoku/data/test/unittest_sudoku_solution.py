@@ -5,7 +5,7 @@ import unittest
 import random
 
 # Local imports
-from sudoku.data.sudoku_solution import SudokuSolution
+from sudoku.data.sudoku_solution_data import SudokuSolution
 
 
 class TestSudokuSolution(unittest.TestCase):

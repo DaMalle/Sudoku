@@ -8,7 +8,7 @@ import random
 # Local imports
 from sudoku.layout.sudoku_board import SudokuBoard           # presentation
 from sudoku.layout.sudoku_numpad import SudokuNumPad         # presentation
-from sudoku.logic.game_logic import GameMode                 # logic
+from sudoku.logic.game_logic import GameMode, Modes          # logic
 from sudoku.logic.game_logic import GamePlay                 # logic
 from sudoku.data.sudoku_board_data import PlayerBoard        # data
 from sudoku.data.sudoku_solution_data import SudokuSolution  # data
@@ -47,13 +47,12 @@ class SettingsPage(tk.Frame):
     def __init__(self, main):
         super().__init__(main)
         self.main = main
-        self.modes = ['Expert', 'Hard', 'Medium', 'Easy']
 
         self.draw_widget()
 
     def draw_widget(self):
-        self.mode_buttons = [ ModeButton(self, mode) for mode in self.modes ]
-        for button in self.mode_buttons: button.grid()
+        for mode in Modes:
+            ModeButton(self, mode).grid()
         
 
 class ModeButton(tk.Button):
@@ -75,7 +74,7 @@ class ModeButton(tk.Button):
         self['bg'] = 'White'
         self['bd'] = 0
         self['highlightthickness'] = 1
-        self['text'] = self.mode
+        self['text'] = self.mode.name
         self['command'] = self.start_game
 
 
@@ -96,6 +95,7 @@ def main():
     root.title('Sudoku')
     MainApp(root).pack()
     root.mainloop()
+
 
 if __name__ == '__main__':
     main()

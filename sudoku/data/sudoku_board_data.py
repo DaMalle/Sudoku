@@ -48,20 +48,15 @@ class PlayerBoard:
             return [tuple(i) for i in board]
 
     def is_possible(self, board, y,x,n):
-        for i in range(9): # Checks horizontal
-            if board[y][i] == n:
-                return False
-
-        for i in range(9): # Checks vertical
-            if board[i][x] == n:
-                return False
-
         x0 = (x // 3) * 3
         y0 = (y // 3) * 3
-        for i in range(3): # Checks tile
-            for j in range(3):
-                if board[y0+i][x0+j] == n:
-                    return False
+        for i in range(9):
+            if board[y][i] == n: # Checks horizontal
+                return False
+            if board[i][x] == n: # Checks vertical
+                return False
+            if board[y0 + (i // 3)][x0 + (i % 3)] == n:  # Checks tile
+                return False
         return True
 
     def is_one_solution(self, board, empty_cells):

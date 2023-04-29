@@ -7,7 +7,7 @@ import random
 
 # Local imports
 from sudoku.logic.game_logic import GameMode, Modes, GamePlay
-from sudoku.data.sudoku_board_data import PlayerBoard, SudokuSolution
+from sudoku.data.board_data import PlayerBoard, SudokuSolution
 
 # Third-party imports
 import numpy as np

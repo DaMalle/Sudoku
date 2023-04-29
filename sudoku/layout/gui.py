@@ -6,12 +6,134 @@ import tkinter as tk
 import random
 
 # Local imports
-from sudoku.layout.sudoku_board import SudokuBoard           # presentation
-from sudoku.layout.sudoku_numpad import SudokuNumPad         # presentation
-from sudoku.logic.game_logic import GameMode, Modes          # logic
-from sudoku.logic.game_logic import GamePlay                 # logic
-from sudoku.data.sudoku_board_data import PlayerBoard        # data
-from sudoku.data.sudoku_solution_data import SudokuSolution  # data
+from sudoku.logic.game_logic import GameMode, Modes, GamePlay
+from sudoku.data.sudoku_board_data import PlayerBoard, SudokuSolution
+
+# Third-party imports
+import numpy as np
+
+
+class SudokuBoard(tk.Canvas):
+    def __init__(self, main: tk.Frame, data: GamePlay) -> None:
+        super().__init__(main)
+        self.main = main
+        self.data = data
+        self._TILE_SIDE = 50
+        self._MARGIN = 20
+        self._GRID_SIDE = self._TILE_SIDE * 9
+        self._BOARD_SIDE = self._GRID_SIDE + 2 * self._MARGIN
+
+        self.solution = np.array(self.data.solution)
+        self.current_board = np.array(self.data.player_board)
+
+        # default focus coordinates
+        self.column = 0
+        self.row = 0
+
+        self.configure_bindings()
+        self.configure_widget()
+        self._draw_grid()
+        self.draw_start_board()
+        self.draw_cursor()
+    
+    def configure_bindings(self) -> None:
+        self.bind('<Button-1>', self.focus_tile)
+        for key in ['<Up>', '<Down>', '<Left>', '<Right>', 'h', 'j', 'k', 'l']:
+            self.bind_all(key, self.move_focus_tile)
+        for key in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '<BackSpace>']:
+            self.bind_all(key, self.insert_key_value)
+    
+    def configure_widget(self) -> None:
+        self['width'] = self._BOARD_SIDE
+        self['height'] = self._BOARD_SIDE
+        self['bg'] = 'white'
+
+    def check_game_state(self) -> None:
+        if np.array_equal(self.current_board, self.solution):
+            self.main.destroy()
+
+    def _draw_grid(self):
+        for i in range(10):
+            self.create_line( # draws vertical lines
+                self._MARGIN + i * self._TILE_SIDE, self._MARGIN,
+                self._MARGIN + i * self._TILE_SIDE, self._BOARD_SIDE - self._MARGIN,
+                fill = 'black' if i % 3 == 0 else 'gray',
+                width = 2 if i % 3 == 0 else 1
+            )
+            
+            self.create_line( # draws horizontal lines
+                self._MARGIN, self._MARGIN + i * self._TILE_SIDE,
+                self._BOARD_SIDE - self._MARGIN, self._MARGIN + i * self._TILE_SIDE,
+                fill = 'black' if i % 3 == 0 else 'gray',
+                width = 2 if i % 3 == 0 else 1
+            )
+    
+    def draw_start_board(self) -> None:
+        for iy, row in enumerate(self.current_board):
+            for ix, number in enumerate(row):
+                if number != 0:
+                    x = ix * self._TILE_SIDE + self._MARGIN + self._TILE_SIDE // 2
+                    y = iy * self._TILE_SIDE + self._MARGIN + self._TILE_SIDE // 2
+                    self.create_text(x, y, text=number, font=('Arial', self._TILE_SIDE // 4))
+    
+    def insert_key_value(self, event: tk.Event) -> None:
+        if self.data.player_board[self.row][self.column] == 0:
+            self.delete(f'x={self.column}y={self.row}')
+            if event.keysym == 'BackSpace':
+                self.current_board[self.row][self.column] = 0
+            else:
+                self.current_board[self.row][self.column] = event.keysym
+                x = self.column * self._TILE_SIDE + self._MARGIN + self._TILE_SIDE // 2
+                y = self.row * self._TILE_SIDE + self._MARGIN + self._TILE_SIDE // 2
+                self.create_text(x, y, text=event.keysym,
+                                tag=f'x={self.column}y={self.row}',
+                                font=('Arial', self._TILE_SIDE // 4),
+                                fill='royalblue')
+        self.check_game_state()
+
+    def move_focus_tile(self, event: tk.Event) -> None:
+        """Assign keys to move focus on sudoku grid"""
+
+        match event.keysym:
+            case 'j' | 'Down':
+                self.row += 1
+                self.row = self.row if self.row <= 8 else 0
+            case 'k' | 'Up':
+                self.row -= 1
+                self.row = self.row if self.row >= 0 else 8
+            case 'h' | 'Left':
+                self.column -= 1
+                self.column = self.column if self.column >= 0 else 8
+            case 'l' | 'Right':
+                self.column += 1
+                self.column = self.column if self.column <= 8 else 0
+        self.draw_cursor()
+
+    def focus_tile(self, event: tk.Event) -> None:
+        if self.is_in_grid(event.x, event.y):
+            self.column = (event.x - self._MARGIN) // self._TILE_SIDE
+            self.row = (event.y - self._MARGIN) // self._TILE_SIDE
+            self.delete('focus_box')
+            self.draw_cursor()
+    
+    def is_in_grid(self, x: int, y: int) -> bool:
+        """returns true if mouse-click is in grid and false if it is not"""
+
+        return (
+           self._MARGIN < y < self._GRID_SIDE + self._MARGIN and
+           self._MARGIN < x < self._GRID_SIDE + self._MARGIN
+        )
+    
+    def draw_cursor(self) -> None:
+        """Draws new focus box on canvas"""
+
+        self.delete("cursor")
+        self.create_rectangle(
+            self._MARGIN + self.column * self._TILE_SIDE + 1,
+            self._MARGIN + self.row * self._TILE_SIDE + 1,
+            self._MARGIN + self.column * self._TILE_SIDE + self._TILE_SIDE - 1,
+            self._MARGIN + self.row * self._TILE_SIDE + self._TILE_SIDE - 1,
+            width=2, outline='red', tag='cursor')
 
 
 class WinPage(tk.Frame):
@@ -40,7 +162,6 @@ class GamePage(tk.Frame):
         self.game_frame = tk.Frame(self, bg='white')
         self.game_frame.grid(row=0, column=0, sticky='news')
         self.board = SudokuBoard(self.game_frame, self.game_data).pack()
-        self.numpad = SudokuNumPad(self.game_frame).pack()
 
 
 class SettingsPage(tk.Frame):
@@ -63,7 +184,7 @@ class ModeButton(tk.Button):
         self.configure_widget()
     
     def start_game(self):
-        self.solution = [ tuple(i) for i in SudokuSolution(random).create() ]
+        self.solution = SudokuSolution(random).create()
         self.player_board = GameMode(self.mode, self.solution, PlayerBoard, random).get_player_board()
         GamePage(self.main.main, GamePlay(self.solution, self.player_board)).grid(row=0, column=0, sticky='news')
 
@@ -85,7 +206,7 @@ class MainApp(tk.Frame):
         self.main['bg'] = 'white'
 
         self.draw_widget()
-    
+
     def draw_widget(self):
         SettingsPage(self).grid(row=0, column=0)
 

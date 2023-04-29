@@ -34,23 +34,10 @@ class GameMode:
             case _:
                 empty_cells = 43
             
-        return self.tiles_to_row(self.board_imp(self.solution, empty_cells, self.random_lib).create())
-    
-    def tiles_to_row(self, board):
-        return [ [ board[y][x] for y in range(i // 3 * 3, (i // 3 * 3) + 3) 
-                               for x in range(i * 3 % 9, (i * 3 % 9) + 3) ]
-                               for i in range(9) ]
+        return self.board_imp(self.solution, empty_cells, self.random_lib).create()
 
 
 class GamePlay:
     def __init__(self, solution, player_board):
-        self.solution = [ tuple(solution[y][x] for y in range(i // 3 * 3, (i // 3 * 3) + 3)
-                                               for x in range(i * 3 % 9, (i * 3 % 9) + 3))
-                                               for i in range(9) ]
+        self.solution = solution
         self.player_board = player_board
-    
-    def check_guess(self, y, x):
-        return self.solution[y][x] == self.player_board[y][x]
-
-    def check_win(self):
-        return self.solution == [ tuple(i) for i in self.player_board ]

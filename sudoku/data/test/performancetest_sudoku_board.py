@@ -4,7 +4,7 @@
 import timeit
 
 # Local imports
-from sudoku.data.sudoku_board_data import PlayerBoard
+from sudoku.data.board_data import PlayerBoard
 
 setup = '''
 from sudoku.data.sudoku_board_data import PlayerBoard

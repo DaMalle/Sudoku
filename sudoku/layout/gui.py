@@ -3,11 +3,10 @@
 
 # Built-in imports
 import tkinter as tk
-import random
 
 # Local imports
-from sudoku.logic.game_logic import GameMode, Modes, GamePlay
-from sudoku.data.sudoku_board_data import PlayerBoard, SudokuSolution
+from sudoku.logic.game_logic import GameMode, GameModes, GamePlay
+from sudoku.data.board_data import PlayerBoard, SudokuSolution
 
 # Third-party imports
 import numpy as np
@@ -37,6 +36,8 @@ class SudokuBoard(tk.Canvas):
         self.draw_cursor()
     
     def configure_bindings(self) -> None:
+        """Assigns keybindings to function for moving cursor and inserting numbers"""
+
         self.bind('<Button-1>', self.focus_tile)
         for key in ['<Up>', '<Down>', '<Left>', '<Right>', 'h', 'j', 'k', 'l']:
             self.bind_all(key, self.move_focus_tile)
@@ -172,7 +173,7 @@ class SettingsPage(tk.Frame):
         self.draw_widget()
 
     def draw_widget(self):
-        for mode in Modes:
+        for mode in GameModes:
             ModeButton(self, mode).grid()
         
 
@@ -184,8 +185,8 @@ class ModeButton(tk.Button):
         self.configure_widget()
     
     def start_game(self):
-        self.solution = SudokuSolution(random).create()
-        self.player_board = GameMode(self.mode, self.solution, PlayerBoard, random).get_player_board()
+        self.solution = SudokuSolution().create()
+        self.player_board = GameMode(self.mode, self.solution, PlayerBoard).get_player_board()
         GamePage(self.main.main, GamePlay(self.solution, self.player_board)).grid(row=0, column=0, sticky='news')
 
     def configure_widget(self):
@@ -211,12 +212,8 @@ class MainApp(tk.Frame):
         SettingsPage(self).grid(row=0, column=0)
 
 
-def main():
+if __name__ == '__main__':
     root = tk.Tk()
     root.title('Sudoku')
     MainApp(root).pack()
     root.mainloop()
-
-
-if __name__ == '__main__':
-    main()

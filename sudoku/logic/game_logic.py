@@ -5,7 +5,7 @@
 from enum import Enum
 
 
-class Modes(Enum):
+class GameModes(Enum):
     Expert = "Expert"
     Hard = "Hard"
     Medium = "Medium"
@@ -13,28 +13,25 @@ class Modes(Enum):
 
 
 class GameMode:
-    def __init__(self, mode, solution, board_imp, random_lib):
+    def __init__(self, mode, solution, board_imp):
         self.mode = mode
 
         # Local import dependencies
         self.solution = solution
         self.board_imp = board_imp
 
-        # Libaries
-        self.random_lib = random_lib
-
     def get_player_board(self):
         match self.mode:
-            case Modes.Expert:
-                empty_cells = 50
-            case Modes.Hard:
-                empty_cells = 47
-            case Modes.Medium:
-                empty_cells = 45
+            case GameModes.Expert:
+                empty_cells_count = 50
+            case GameModes.Hard:
+                empty_cells_count = 47
+            case GameModes.Medium:
+                empty_cells_count = 45
             case _:
-                empty_cells = 43
+                empty_cells_count = 43
             
-        return self.board_imp(self.solution, empty_cells, self.random_lib).create()
+        return self.board_imp(self.solution, empty_cells_count).create()
 
 
 class GamePlay:

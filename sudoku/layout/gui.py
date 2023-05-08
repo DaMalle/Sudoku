@@ -8,22 +8,18 @@ import tkinter as tk
 from sudoku.logic.game_logic import GameMode, GameModes, GamePlay
 from sudoku.data.board_data import PlayerBoard, SudokuSolution
 
-# Third-party imports
-import numpy as np
-
 
 class SudokuBoard(tk.Canvas):
     def __init__(self, main: tk.Frame, data: GamePlay) -> None:
         super().__init__(main)
         self.main = main
-        self.data = data
+        self._data = data
         self._TILE_SIDE = 50
         self._MARGIN = 20
         self._GRID_SIDE = self._TILE_SIDE * 9
         self._BOARD_SIDE = self._GRID_SIDE + 2 * self._MARGIN
 
-        self.solution = np.array(self.data.solution)
-        self.current_board = np.array(self.data.player_board)
+        self.current_board = list(list(row) for row in self._data.player_board.board)
 
         # default focus coordinates
         self.column = 0
@@ -50,7 +46,8 @@ class SudokuBoard(tk.Canvas):
         self['bg'] = 'white'
 
     def check_game_state(self) -> None:
-        if np.array_equal(self.current_board, self.solution):
+        current_solution = tuple(tuple(row) for row in self.current_board)
+        if current_solution == self._data.solution.board:
             self.main.destroy()
 
     def _draw_grid(self):
@@ -78,12 +75,12 @@ class SudokuBoard(tk.Canvas):
                     self.create_text(x, y, text=number, font=('Arial', self._TILE_SIDE // 4))
     
     def insert_key_value(self, event: tk.Event) -> None:
-        if self.data.player_board[self.row][self.column] == 0:
+        if self._data.player_board.board[self.row][self.column] == 0:
             self.delete(f'x={self.column}y={self.row}')
             if event.keysym == 'BackSpace':
                 self.current_board[self.row][self.column] = 0
             else:
-                self.current_board[self.row][self.column] = event.keysym
+                self.current_board[self.row][self.column] = int(event.keysym)
                 x = self.column * self._TILE_SIDE + self._MARGIN + self._TILE_SIDE // 2
                 y = self.row * self._TILE_SIDE + self._MARGIN + self._TILE_SIDE // 2
                 self.create_text(x, y, text=event.keysym,

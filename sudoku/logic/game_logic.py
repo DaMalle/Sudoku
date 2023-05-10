@@ -1,8 +1,11 @@
 #! /usr/bin/env python
 
 
-# built-in imports
+# Built-in imports
 from enum import Enum
+
+# Local imports
+from sudoku.data.board_data import PlayerBoard, SudokuSolution
 
 
 class GameModes(Enum):
@@ -12,15 +15,13 @@ class GameModes(Enum):
     Easy = "Easy"
 
 
-class GameMode:
-    def __init__(self, mode, solution, board_imp):
+class GamePlay:
+    def __init__(self, mode: GameModes):
         self.mode = mode
+        self.solution = SudokuSolution().create()
+        self.player_board = self._get_player_board()
 
-        # Local import dependencies
-        self.solution = solution
-        self.board_imp = board_imp
-
-    def get_player_board(self):
+    def _get_player_board(self) -> PlayerBoard:
         match self.mode:
             case GameModes.Expert:
                 empty_cells_count = 50
@@ -29,12 +30,5 @@ class GameMode:
             case GameModes.Medium:
                 empty_cells_count = 45
             case _:
-                empty_cells_count = 1 # 43
-            
-        return self.board_imp(self.solution, empty_cells_count).create()
-
-
-class GamePlay:
-    def __init__(self, solution, player_board):
-        self.solution = solution
-        self.player_board = player_board
+                empty_cells_count = 1#43
+        return PlayerBoard(self.solution, empty_cells_count).create()

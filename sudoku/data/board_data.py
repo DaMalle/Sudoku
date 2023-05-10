@@ -113,8 +113,8 @@ class PlayerBoard:
         for cell in self._empty_cells:
             x, y = cell
             key = f'{x}{y}'
-            self._possible_cell_values[key].remove(self.solution[y][x])
-            self._possible_cell_values[key].append(self.solution[y][x])
+            self._possible_cell_values[key].remove(self.solution.board[y][x])
+            self._possible_cell_values[key].append(self.solution.board[y][x])
 
     
     def _get_possible_cell_values(self) -> dict[str, list[int]]:

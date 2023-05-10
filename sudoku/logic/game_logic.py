@@ -30,5 +30,5 @@ class GamePlay:
             case GameModes.Medium:
                 empty_cells_count = 45
             case _:
-                empty_cells_count = 1#43
+                empty_cells_count = 43
         return PlayerBoard(self.solution, empty_cells_count).create()

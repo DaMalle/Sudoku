@@ -10,12 +10,12 @@ class BoardSizeError(Exception):
     pass
 
 
-class SudokuBoard:    
+class SudokuBoard:
     def __init__(self, grid: tuple[tuple[int]]) -> None:
         self._grid = grid
         if not self._is_valid_grid_size():
             raise BoardSizeError("Sudoku board is not 9x9")
-    
+
     def _is_valid_grid_size(self) -> bool:
         """Checks if self._grid is 9x9"""
         for row in self._grid:
@@ -30,7 +30,7 @@ class SudokuBoard:
     def get_transpose(self) -> tuple[tuple[int]]:
         """Returns grid with rows as columns"""
         return tuple(map(*self._grid))
-    
+
     def get_tiles(self) -> tuple[tuple[int]]:
         """Returns tuple with 9 3x3 tiles in sudoku board"""
         return tuple(
@@ -54,8 +54,8 @@ class SudokuSolution:
 
         _shuffled_nums = self._shuffle(range(1, 10))
 
-        # generates and shuffles row- & column-numbers in groups, 
-        # based on the length of the tile. 
+        # generates and shuffles row- & column-numbers in groups,
+        # based on the length of the tile.
         # example: [|3, 1, 2,| 6, 5, 4,|7, 9, 8|]
         _row_order = tuple(
             g * self._BASE + r
@@ -77,7 +77,7 @@ class SudokuSolution:
     # support/internal functions
     def _shuffle(self, data: range) -> list[int]:
         return random.sample(data, len(data))
-    
+
     def _apply_pattern(self, row: int, column: int) -> int:
         """creates a default board by rotating cells in the tile by 3
         and then by 1 more for each new tile
@@ -91,9 +91,9 @@ class PlayerBoard:
     def __init__(self, solution: SudokuBoard, empty_cells_count: int) -> None:
         self.solution = solution
         self.empty_cells_count = empty_cells_count
-    
+
     def create(self) -> SudokuBoard:
-        """Continues to create a player board 
+        """Continues to create a player board
         until one is found with only one solution
         """
 
@@ -108,7 +108,7 @@ class PlayerBoard:
             self._set_initial_solution_last()
             player_board_found = self.solution.board == self._solve()
         return SudokuBoard(_board_copy)
-    
+
     def _set_initial_solution_last(self) -> None:
         for cell in self._empty_cells:
             x, y = cell
@@ -116,7 +116,6 @@ class PlayerBoard:
             self._possible_cell_values[key].remove(self.solution.board[y][x])
             self._possible_cell_values[key].append(self.solution.board[y][x])
 
-    
     def _get_possible_cell_values(self) -> dict[str, list[int]]:
         return dict(
             (f"{cell[0]}{cell[1]}", [i for i in range(1, 10)
@@ -124,7 +123,7 @@ class PlayerBoard:
             for cell in self._empty_cells
         )
 
-    def _get_empty_cells(self) -> list[tuple[int]]:
+    def _get_empty_cells(self) -> list[tuple[int, int]]:
         """Returns coordinates for cells = 0 in sudoku grid"""
         return [
             (x, y) for y in range(9) for x in range(9)
@@ -134,7 +133,7 @@ class PlayerBoard:
     def _unfill_cells(self) -> None:
         for i in random.sample(range(81), self.empty_cells_count):
             self._board[i // 9][i % 9] = 0
-    
+
     def _solve(self) -> tuple[tuple[int]] | None:
         """Solves a sudoku board with recursion and backtracking"""
 
@@ -173,9 +172,9 @@ class PlayerBoard:
         x0 = (x // 3) * 3
         y0 = (y // 3) * 3
         for i in range(9):
-            if self._board[y][i] == n: # Checks horizontal
+            if self._board[y][i] == n:  # Checks horizontal
                 return False
-            if self._board[i][x] == n: # Checks vertical
+            if self._board[i][x] == n:  # Checks vertical
                 return False
             if self._board[y0 + (i // 3)][x0 + (i % 3)] == n:  # Checks tile
                 return False
